@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest --coverage --collectCoverageFrom='src/**/*.{ts,tsx}'",
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "tsc",

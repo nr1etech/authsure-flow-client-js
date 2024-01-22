@@ -1,4 +1,9 @@
-import {generateCodeVerifier, generateCodeVerifierChallenge, generateNonce} from './crypto-helper';
+import {
+  generateCodeVerifier,
+  generateCodeVerifierChallenge,
+  generateNonce,
+  generateState,
+} from './crypto-helper';
 
 test('Test generateNonce', () => {
   const nonce = generateNonce();
@@ -20,11 +25,12 @@ test('Test generateCodeVerifierChallenge', () => {
   expect(codeVerifierChallenge).not.toBeNull();
   expect(codeVerifierChallenge).not.toBeUndefined();
   expect(codeVerifierChallenge.challenge.length).toBe(43);
+  expect(codeVerifierChallenge.method).toBe('S256');
 });
 
 test('Test generateState', () => {
-  const state = generateNonce();
+  const state = generateState();
   expect(state).not.toBeNull();
   expect(state).not.toBeUndefined();
-  expect(state.length).toBe(32);
+  expect(state.length).toBe(43);
 });
