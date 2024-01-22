@@ -5,7 +5,8 @@ notes.txt
 *.d.ts
 node_modules
 dist
-!.prettierrc.js
+!.prettierrc.
+src/oneoff.test.ts
 
 # https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
