@@ -138,9 +138,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
   ) {
     super(config);
     this.scopes = config.scopes;
-    this.jwtVerifier =
-      config.jwtVerifier ??
-      new JwtVerifier(this.jwksUri);
+    this.jwtVerifier = config.jwtVerifier ?? new JwtVerifier(this.jwksUri);
   }
 
   getAuthorizationUrl(): string {

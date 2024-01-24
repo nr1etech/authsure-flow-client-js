@@ -1,11 +1,17 @@
 import axios, {AxiosInstance} from 'axios';
 import {getOpenIdConfiguration, OpenIdConfiguration} from './oidc-functions';
 
+/**
+ * Configuration for the Flow client.
+ */
 export interface FlowClientConfig {
   readonly authSureDomain: string;
   readonly client?: AxiosInstance;
 }
 
+/**
+ * Base class for all Flow clients.
+ */
 export abstract class FlowClient {
   protected readonly authSureDomain: string;
   protected readonly client: AxiosInstance;
