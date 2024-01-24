@@ -6,12 +6,23 @@ import {
   jwtVerify,
   KeyLike,
   decodeJwt,
+  JWTVerifyResult,
 } from 'jose';
+import {AuthSureFlowClientError, isAuthSureFlowClientError} from './errors';
 
 type Jwks = (
   protectedHeader?: JWSHeaderParameters,
   token?: FlattenedJWSInput
 ) => Promise<KeyLike>;
+
+/**
+ * Result object for safe methods.
+ */
+export interface SafeResult<T> {
+  readonly success: boolean;
+  readonly error: AuthSureFlowClientError | null;
+  readonly token: T | null;
+}
 
 /**
  * Provider provided data.
@@ -89,8 +100,8 @@ export interface TokenTimestamps {
 /**
  * Checks if an exp timestamp is expired.
  *
- * @param exp the expiration timestamp
- * @param bufferSeconds the number of seconds to subtract from the expiration timestamp
+ * @param exp the expiration timestamp in seconds
+ * @param bufferSeconds the number of seconds before the expiration timestamp to consider the token expired
  */
 export function isExpired(exp: number, bufferSeconds?: number) {
   return Date.now() > (exp - (bufferSeconds ?? 0)) * 1000;
@@ -100,7 +111,7 @@ export function isExpired(exp: number, bufferSeconds?: number) {
  * Checks if a token is expired.
  *
  * @param token the token to check
- * @param bufferSeconds the number of seconds to subtract from the expiration timestamp
+ * @param bufferSeconds the number of seconds before the expiration timestamp to consider the token expired
  */
 export function isTokenExpired(token: TokenTimestamps, bufferSeconds?: number) {
   return isExpired(token.exp, bufferSeconds);
@@ -182,47 +193,68 @@ function rawToDecodedIdToken(
   payload: DecodedRawIdToken
 ): DecodedIdToken | null {
   if (payload.name === undefined || payload.name === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing name in ID token');
   }
   if (payload.aud === undefined || payload.aud === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing aud in ID token');
   }
   if (payload.iss === undefined || payload.iss === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing iss in ID token');
   }
   if (payload.sub === undefined || payload.sub === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing sub in ID token');
   }
   if (payload.jti === undefined || payload.jti === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing jti in ID token');
   }
   if (payload.nbf === undefined || payload.nbf === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing nbf in ID token');
   }
   if (payload.exp === undefined || payload.exp === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing exp in ID token');
   }
   if (payload.iat === undefined || payload.iat === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing iat in ID token');
   }
+  const {
+    iss,
+    sub,
+    aud,
+    jti,
+    nbf,
+    exp,
+    iat,
+    email,
+    name,
+    given_name,
+    family_name,
+    idp,
+    provider_id,
+    provider_type,
+    provider_login_hint,
+    provider_data,
+    nonce,
+    ...rest
+  } = payload;
   return {
-    iss: payload.iss,
-    sub: payload.sub,
-    aud: Array.isArray(payload.aud) ? payload.aud : [payload.aud],
-    jti: payload.jti,
-    nbf: payload.nbf,
-    exp: payload.exp,
-    iat: payload.iat,
-    email: payload.email,
-    name: payload.name,
-    givenName: payload.given_name,
-    familyName: payload.family_name,
-    idp: payload.idp,
-    providerId: payload.provider_id,
-    providerType: payload.provider_type,
-    providerLoginHint: payload.provider_login_hint,
-    providerData: payload.provider_data,
-    nonce: payload.nonce,
+    iss,
+    sub,
+    aud: Array.isArray(aud) ? aud : [aud],
+    jti,
+    nbf,
+    exp,
+    iat,
+    email,
+    name,
+    givenName: given_name,
+    familyName: family_name,
+    idp: idp,
+    providerId: provider_id,
+    providerType: provider_type,
+    providerLoginHint: provider_login_hint,
+    providerData: provider_data,
+    nonce: nonce,
+    ...rest,
   };
 }
 
@@ -231,6 +263,9 @@ interface DecodedRawAccessToken extends JWTPayload {
   client_id?: string;
 }
 
+/**
+ * Decoded access token.
+ */
 export interface DecodedAccessToken extends TokenTimestamps {
   /**
    * JWT Issuer
@@ -265,6 +300,10 @@ export interface DecodedAccessToken extends TokenTimestamps {
    */
   clientId: string;
   /**
+   * Identify provider used.
+   */
+  idp?: string;
+  /**
    * Any other JWT Claim Set member.
    */
   [propName: string]: unknown;
@@ -274,36 +313,40 @@ function rawToDecodedAccessToken(
   payload: DecodedRawAccessToken
 ): DecodedAccessToken | null {
   if (payload.client_id === undefined || payload.client_id === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing client_id in access token');
   }
   if (payload.aud === undefined || payload.aud === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing aud in access token');
   }
-  if (payload.issue === undefined || payload.issue === null) {
-    return null;
+  if (payload.iss === undefined || payload.iss === null) {
+    throw new AuthSureFlowClientError('Missing iss in access token');
   }
   if (payload.jti === undefined || payload.jti === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing jti in access token');
   }
   if (payload.nbf === undefined || payload.nbf === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing nbf in access token');
   }
   if (payload.exp === undefined || payload.exp === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing exp in access token');
   }
   if (payload.iat === undefined || payload.iat === null) {
-    return null;
+    throw new AuthSureFlowClientError('Missing iat in access token');
   }
+  const {iss, sub, aud, jti, nbf, exp, iat, scope, client_id, idp, ...rest} =
+    payload;
   return {
-    iss: payload.iss!,
-    sub: payload.sub,
-    aud: Array.isArray(payload.aud) ? payload.aud : [payload.aud],
-    jti: payload.jti,
-    nbf: payload.nbf,
-    exp: payload.exp,
-    iat: payload.iat,
-    scopes: payload.scope?.split(' ') ?? [],
-    clientId: payload.client_id,
+    iss,
+    sub,
+    aud: Array.isArray(aud) ? aud : [aud],
+    jti,
+    nbf,
+    exp,
+    iat,
+    scopes: scope?.split(' ') ?? [],
+    clientId: client_id,
+    idp: idp as string | undefined,
+    ...rest,
   };
 }
 
@@ -315,19 +358,49 @@ function rawToDecodedAccessToken(
 export function decodeAccessToken(
   accessToken: string
 ): DecodedAccessToken | null {
+  let result;
   try {
-    const payload = decodeJwt(accessToken) as unknown as DecodedRawAccessToken;
-    return rawToDecodedAccessToken(payload);
+    result = decodeJwt(accessToken) as unknown as DecodedRawAccessToken;
   } catch (err) {
-    return null;
+    if (err instanceof Error) {
+      throw new AuthSureFlowClientError(
+        `Failed to decode access token: ${err.message}`,
+        err
+      );
+    }
+    throw new AuthSureFlowClientError('Failed to decode access token', err);
   }
+  return rawToDecodedAccessToken(result);
 }
 
 /**
- * Properties for the JWT verifier.
+ * Safe version of decodeAccessToken that returns a result object instead of throwing an error.
+ *
+ * @param accessToken the access token to decode
  */
-export interface JwtVerifierProps {
-  readonly jwksUri: string;
+export function decodeAccessTokenSafe(
+  accessToken: string
+): SafeResult<DecodedAccessToken> {
+  try {
+    return {
+      success: true,
+      error: null,
+      token: decodeAccessToken(accessToken),
+    };
+  } catch (err) {
+    if (isAuthSureFlowClientError(err)) {
+      return {
+        success: false,
+        error: err,
+        token: null,
+      };
+    }
+    return {
+      success: false,
+      error: new AuthSureFlowClientError('Failed to decode access token', err),
+      token: null,
+    };
+  }
 }
 
 /**
@@ -352,13 +425,20 @@ export interface VerifyAccessTokenProps {
  * Used to handle JWT verification handling JWKS caching.
  */
 export class JwtVerifier {
-  public readonly jwksUri: string;
   protected readonly jwks: Jwks;
 
-  constructor(props: JwtVerifierProps) {
-    this.jwksUri = props.jwksUri;
-    // eslint-disable-next-line node/no-unsupported-features/node-builtins
-    this.jwks = createRemoteJWKSet(new URL(props.jwksUri));
+  /**
+   * Creates a new JWT verifier.
+   *
+   * @param jwks the JWKS or URL to the JWKS instance to use
+   */
+  constructor(jwks: string | Jwks) {
+    if (typeof jwks === 'string') {
+      // eslint-disable-next-line node/no-unsupported-features/node-builtins
+      this.jwks = createRemoteJWKSet(new URL(jwks));
+    } else {
+      this.jwks = jwks;
+    }
   }
 
   /**
@@ -371,14 +451,51 @@ export class JwtVerifier {
   async verifyIdToken(
     props: VerifyIdTokenProps
   ): Promise<DecodedIdToken | null> {
+    let result: JWTVerifyResult<DecodedRawIdToken>;
     try {
-      const payload = jwtVerify(props.idToken, this.jwks, {
+      result = await jwtVerify(props.idToken, this.jwks, {
         issuer: props.issuer,
         audience: props.clientId,
-      }) as unknown as DecodedRawIdToken;
-      return rawToDecodedIdToken(payload);
+      });
     } catch (err) {
-      return null;
+      if (err instanceof Error) {
+        throw new AuthSureFlowClientError(
+          `Failed to verify ID token: ${err.message}`,
+          err
+        );
+      }
+      throw new AuthSureFlowClientError('Failed to verify ID token', err);
+    }
+    return rawToDecodedIdToken(result.payload);
+  }
+
+  /**
+   * Safe version of verifyIdToken that returns a result object instead of throwing an error.
+   *
+   * @param props the JWT and verification parameters
+   */
+  async verifyIdTokenSafe(
+    props: VerifyIdTokenProps
+  ): Promise<SafeResult<DecodedIdToken>> {
+    try {
+      return {
+        success: true,
+        error: null,
+        token: await this.verifyIdToken(props),
+      };
+    } catch (err) {
+      if (isAuthSureFlowClientError(err)) {
+        return {
+          success: false,
+          error: err,
+          token: null,
+        };
+      }
+      return {
+        success: false,
+        error: new AuthSureFlowClientError('Failed to verify ID token', err),
+        token: null,
+      };
     }
   }
 
@@ -392,14 +509,54 @@ export class JwtVerifier {
   async verifyAccessToken(
     props: VerifyAccessTokenProps
   ): Promise<DecodedAccessToken | null> {
+    let result: JWTVerifyResult<DecodedRawAccessToken>;
     try {
-      const payload = jwtVerify(props.accessToken, this.jwks, {
+      result = await jwtVerify(props.accessToken, this.jwks, {
         issuer: props.issuer,
         audience: props.audience,
-      }) as unknown as DecodedRawAccessToken;
-      return rawToDecodedAccessToken(payload);
+      });
     } catch (err) {
-      return null;
+      if (err instanceof Error) {
+        throw new AuthSureFlowClientError(
+          `Failed to verify access token: ${err.message}`,
+          err
+        );
+      }
+      throw new AuthSureFlowClientError('Failed to verify access token', err);
+    }
+    return rawToDecodedAccessToken(result.payload);
+  }
+
+  /**
+   * Safe version of verifyAccessToken that returns a result object instead of throwing an error.
+   *
+   * @param props the JWT and verification parameters
+   */
+  async verifyAccessTokenSafe(
+    props: VerifyAccessTokenProps
+  ): Promise<SafeResult<DecodedAccessToken>> {
+    try {
+      return {
+        success: true,
+        error: null,
+        token: await this.verifyAccessToken(props),
+      };
+    } catch (err) {
+      if (isAuthSureFlowClientError(err)) {
+        return {
+          success: false,
+          error: err,
+          token: null,
+        };
+      }
+      return {
+        success: false,
+        error: new AuthSureFlowClientError(
+          'Failed to verify access token',
+          err
+        ),
+        token: null,
+      };
     }
   }
 }

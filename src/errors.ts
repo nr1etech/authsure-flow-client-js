@@ -3,7 +3,10 @@
  */
 export class AuthSureFlowClientError extends Error {
   readonly name = 'AuthSureFlowClientError';
-  constructor(message: string) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
     super(message);
   }
 }
