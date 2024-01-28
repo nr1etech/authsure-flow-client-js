@@ -15,7 +15,8 @@ test('Test Happy Path Client Credentials Flow', async () => {
   // These credentials are specific to integration tests in this repository. They do not grant access to anything
   // important, and they belong to an AuthSure organization that is only used for testing. They are not secrets.
   const clientId = 'flow-client-js-test';
-  const clientSecret = 'paxxXuyWhiLh0taW4uWPtF_A94m9aPiAbvuLcyIy4SfUe5ecssG_pNNbPvPLTn9T';
+  const clientSecret =
+    'paxxXuyWhiLh0taW4uWPtF_A94m9aPiAbvuLcyIy4SfUe5ecssG_pNNbPvPLTn9T';
 
   const client = new ClientCredentialsFlowClient({
     authSureDomain: 'test.authsure.io',
