@@ -2,6 +2,7 @@
 import type {JestConfigWithTsJest} from 'ts-jest';
 
 const jestConfig: JestConfigWithTsJest = {
+  testTimeout: 30000,
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],

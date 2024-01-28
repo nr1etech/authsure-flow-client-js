@@ -4,7 +4,7 @@ import {
   generateState,
   generateCodeVerifier,
   generateCodeVerifierChallenge,
-} from './crypto-helper';
+} from './crypto-helper.js';
 
 /**
  * The response from the OpenId configuration endpoint.

@@ -3,7 +3,7 @@ import {
   generateCodeVerifierChallenge,
   generateNonce,
   generateState,
-} from './crypto-helper';
+} from './crypto-helper.js';
 
 test('Test generateNonce', () => {
   const nonce = generateNonce();

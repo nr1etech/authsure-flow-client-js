@@ -1,10 +1,12 @@
 import axios, {AxiosInstance} from 'axios';
-import {FlowClient} from './flow-client';
+import {FlowClient} from './flow-client.js';
 import {
   exchangeClientCredentials,
   ExchangeClientCredentialsResult,
-} from './oidc-functions';
-import {decodeAccessToken, isExpired} from './jwt-helper';
+} from './oidc-functions.js';
+import {decodeAccessToken, isExpired} from './jwt-helper.js';
+import {SafeResult} from './safe-result.js';
+import {AuthSureFlowClientError, isAuthSureFlowClientError} from './errors.js';
 
 /**
  * Callback for token exchange.
@@ -143,17 +145,76 @@ export class ClientCredentialsFlowClient extends FlowClient {
   }
 
   /**
+   * Exchanges the client credentials for an access token which is stored in the client.
+   * This method does not throw exceptions and instead returns a SafeResult which can be used to check if the operation was successful.
+   */
+  async exchangeSafe(): Promise<SafeResult<ExchangeClientCredentialsResult>> {
+    try {
+      const result = await this.exchange();
+      return {
+        success: true,
+        error: null,
+        result,
+      };
+    } catch (err) {
+      if (isAuthSureFlowClientError(err)) {
+        return {
+          success: false,
+          error: err,
+          result: null,
+        };
+      }
+      return {
+        success: false,
+        error: new AuthSureFlowClientError(
+          'Failed to exchange client credentials',
+          err
+        ),
+        result: null,
+      };
+    }
+  }
+
+  /**
    * Gets the access token. If the access token is expired, it will be refreshed.
    */
   async getToken(): Promise<ExchangeClientCredentialsResult> {
     if (
-      !this.result &&
-      this.expiration !== undefined &&
-      !isExpired(this.expiration, this.expirationBufferSeconds)
+      this.result === undefined ||
+      this.expiration === undefined ||
+      isExpired(this.expiration, this.expirationBufferSeconds)
     ) {
       await this.exchange();
     }
     return this.result!;
+  }
+
+  /**
+   * Gets the access token. If the access token is expired, it will be refreshed.
+   * This method does not throw exceptions and instead returns a SafeResult which can be used to check if the operation was successful.
+   */
+  async getTokenSafe(): Promise<SafeResult<ExchangeClientCredentialsResult>> {
+    try {
+      const result = await this.getToken();
+      return {
+        success: true,
+        error: null,
+        result,
+      };
+    } catch (err) {
+      if (isAuthSureFlowClientError(err)) {
+        return {
+          success: false,
+          error: err,
+          result: null,
+        };
+      }
+      return {
+        success: false,
+        error: new AuthSureFlowClientError('Failed to get token', err),
+        result: null,
+      };
+    }
   }
 
   /**
@@ -177,13 +238,14 @@ export class ClientCredentialsFlowClient extends FlowClient {
         if (this.result === undefined || this.expiration === undefined) {
           await this.exchange();
         } else {
-          this.intervalId = setInterval(
-            async () => {
-              this.intervalId = undefined;
-              await this.exchange();
-            },
-            (this.expiration - this.refreshBufferSeconds) * 1000
-          );
+          let timeout =
+            this.expiration - Date.now() - this.refreshBufferSeconds * 1000;
+          if (timeout <= 0) {
+            timeout = 1000;
+          }
+          this.intervalId = setInterval(async () => {
+            await this.exchange();
+          }, timeout);
         }
       }
     }

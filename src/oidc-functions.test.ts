@@ -4,7 +4,7 @@ import {
   getAuthorizationCodeFlowUrl,
   getOpenIdConfiguration,
   isAuthorizationCodeFlowPkceUrl,
-} from './oidc-functions';
+} from './oidc-functions.js';
 
 test('Test getOpenIdConfiguration', async () => {
   const client = axios.create();

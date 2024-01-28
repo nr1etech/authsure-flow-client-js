@@ -7,13 +7,13 @@ import {
   ExchangeRefreshTokenResult,
   getAuthorizationCodeFlowPkceUrl,
   getAuthorizationCodeFlowUrl,
-} from './oidc-functions';
-import {RefreshTokenManager} from './refresh-token-manager';
+} from './oidc-functions.js';
+import {RefreshTokenManager} from './refresh-token-manager.js';
 import {AxiosInstance} from 'axios';
-import {FlowClient} from './flow-client';
-import {AuthSureFlowClientError} from './errors';
+import {FlowClient} from './flow-client.js';
+import {AuthSureFlowClientError} from './errors.js';
 import {JWTPayload} from 'jose';
-import {decodeAccessToken, JwtVerifier} from './jwt-helper';
+import {decodeAccessToken, JwtVerifier} from './jwt-helper.js';
 
 /**
  * Base configuration options for AuthorizationCodeFlow.

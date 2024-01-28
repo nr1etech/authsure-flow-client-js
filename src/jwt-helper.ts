@@ -8,21 +8,13 @@ import {
   decodeJwt,
   JWTVerifyResult,
 } from 'jose';
-import {AuthSureFlowClientError, isAuthSureFlowClientError} from './errors';
+import {AuthSureFlowClientError, isAuthSureFlowClientError} from './errors.js';
+import {SafeResult} from './safe-result.js';
 
 type Jwks = (
   protectedHeader?: JWSHeaderParameters,
   token?: FlattenedJWSInput
 ) => Promise<KeyLike>;
-
-/**
- * Result object for safe methods.
- */
-export interface SafeResult<T> {
-  readonly success: boolean;
-  readonly error: AuthSureFlowClientError | null;
-  readonly token: T | null;
-}
 
 /**
  * Provider provided data.
@@ -385,20 +377,20 @@ export function decodeAccessTokenSafe(
     return {
       success: true,
       error: null,
-      token: decodeAccessToken(accessToken),
+      result: decodeAccessToken(accessToken),
     };
   } catch (err) {
     if (isAuthSureFlowClientError(err)) {
       return {
         success: false,
         error: err,
-        token: null,
+        result: null,
       };
     }
     return {
       success: false,
       error: new AuthSureFlowClientError('Failed to decode access token', err),
-      token: null,
+      result: null,
     };
   }
 }
@@ -430,12 +422,19 @@ export class JwtVerifier {
   /**
    * Creates a new JWT verifier.
    *
-   * @param jwks the JWKS or URL to the JWKS instance to use
+   * @param jwks the JWKS instance, URL to the JWKS endpoint, or your AuthSure domain.
    */
   constructor(jwks: string | Jwks) {
     if (typeof jwks === 'string') {
-      // eslint-disable-next-line node/no-unsupported-features/node-builtins
-      this.jwks = createRemoteJWKSet(new URL(jwks));
+      if (jwks.startsWith('https://')) {
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        this.jwks = createRemoteJWKSet(new URL(jwks));
+      } else {
+        this.jwks = createRemoteJWKSet(
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          new URL(`https://${jwks}/.well-known/openid-configuration/jwks`)
+        );
+      }
     } else {
       this.jwks = jwks;
     }
@@ -481,20 +480,20 @@ export class JwtVerifier {
       return {
         success: true,
         error: null,
-        token: await this.verifyIdToken(props),
+        result: await this.verifyIdToken(props),
       };
     } catch (err) {
       if (isAuthSureFlowClientError(err)) {
         return {
           success: false,
           error: err,
-          token: null,
+          result: null,
         };
       }
       return {
         success: false,
         error: new AuthSureFlowClientError('Failed to verify ID token', err),
-        token: null,
+        result: null,
       };
     }
   }
@@ -539,14 +538,14 @@ export class JwtVerifier {
       return {
         success: true,
         error: null,
-        token: await this.verifyAccessToken(props),
+        result: await this.verifyAccessToken(props),
       };
     } catch (err) {
       if (isAuthSureFlowClientError(err)) {
         return {
           success: false,
           error: err,
-          token: null,
+          result: null,
         };
       }
       return {
@@ -555,7 +554,7 @@ export class JwtVerifier {
           'Failed to verify access token',
           err
         ),
-        token: null,
+        result: null,
       };
     }
   }

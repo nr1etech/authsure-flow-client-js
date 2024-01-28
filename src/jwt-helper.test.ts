@@ -4,7 +4,7 @@ import {
   isExpired,
   isTokenExpired,
   JwtVerifier,
-} from './jwt-helper';
+} from './jwt-helper.js';
 import {SignJWT, createLocalJWKSet, generateKeyPair, exportJWK} from 'jose';
 
 test('Test isExpired', () => {
@@ -111,7 +111,7 @@ test('Test verifyIdToken', async () => {
   expect(result).toEqual({
     success: true,
     error: null,
-    token: result.token,
+    result: result.result,
   });
 });
 
@@ -165,7 +165,7 @@ test('Test verifyAccessToken', async () => {
   expect(result).toEqual({
     success: true,
     error: null,
-    token: result.token,
+    result: result.result,
   });
 });
 
@@ -210,6 +210,6 @@ test('Test decodeAccessToken', async () => {
   expect(result).toEqual({
     success: true,
     error: null,
-    token: result.token,
+    result: result.result,
   });
 });

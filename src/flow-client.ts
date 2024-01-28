@@ -1,5 +1,5 @@
 import axios, {AxiosInstance} from 'axios';
-import {getOpenIdConfiguration, OpenIdConfiguration} from './oidc-functions';
+import {getOpenIdConfiguration, OpenIdConfiguration} from './oidc-functions.js';
 
 /**
  * Configuration for the Flow client.

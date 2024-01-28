@@ -2,9 +2,9 @@ import axios, {AxiosInstance} from 'axios';
 import {
   exchangeRefreshToken,
   ExchangeRefreshTokenResult,
-} from './oidc-functions';
-import {AuthSureFlowClientError} from './errors';
-import {decodeAccessToken} from './jwt-helper';
+} from './oidc-functions.js';
+import {AuthSureFlowClientError} from './errors.js';
+import {decodeAccessToken} from './jwt-helper.js';
 
 /**
  * Callback for the refresh token.
