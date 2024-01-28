@@ -72,7 +72,7 @@ export class RefreshTokenManager {
   protected expirationBufferSeconds: number;
   protected client: AxiosInstance;
   protected expiration: number;
-  protected intervalId?: NodeJS.Timeout;
+  protected intervalId?: ReturnType<typeof setTimeout>;
   protected callbacks: RefreshTokenCallback[];
 
   constructor(props: RefreshTokenManagerProps) {

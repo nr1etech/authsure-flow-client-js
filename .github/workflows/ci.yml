@@ -10,6 +10,8 @@
       with:
         github-email: "365211+erikrj@users.noreply.github.com"
         github-name: "Erik Jensen"
+        site-branch: "main"
+        publish-dir: "dist"
       secrets:
         deploy-key: ${{ secrets.DEPLOY_KEY }}
         npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}

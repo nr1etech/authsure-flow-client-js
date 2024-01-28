@@ -6,8 +6,8 @@
 
 ## Links
 
-- [Published NPM Package](https://www.npmjs.com/package/authsure-flow-client)
-- [GitHub Repository](https://github.com/netradius/authsure-flow-client-js)
+-   [Published NPM Package](https://www.npmjs.com/package/authsure-flow-client)
+-   [GitHub Repository](https://github.com/netradius/authsure-flow-client-js)
 
 [github-url]: https://github.com/nr1etech/authsure-flow-client-js/actions
 [github-image]: https://github.com/nr1etech/authsure-flow-client-js/workflows/ci/badge.svg

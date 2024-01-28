@@ -170,7 +170,7 @@ test('Test verifyAccessToken', async () => {
 });
 
 test('Test decodeAccessToken', async () => {
-  const {publicKey, privateKey} = await generateKeyPair('RS256');
+  const {privateKey} = await generateKeyPair('RS256');
   const exp = Date.now() / 1000 + 30000;
   const iat = Date.now() / 1000;
   const nbf = Date.now() / 1000 - 1000;

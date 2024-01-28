@@ -5,8 +5,9 @@ notes.txt
 *.d.ts
 node_modules
 dist
-!.prettierrc.
+!.prettierrc.js
 src/oneoff.test.ts
+site
 coverage
 
 # https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
