@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@nr1e/commons':
     specifier: ^0.0.3-alpha.23
-    version: 0.0.3-alpha.23
+    version: 0.0.3-alpha.24
   axios:
     specifier: ^1.6.7
     version: 1.6.7
@@ -740,8 +740,8 @@ packages:
       fastq: 1.16.0
     dev: true
 
-  /@nr1e/commons@0.0.3-alpha.23:
-    resolution: {integrity: sha512-UkXHmJY/lrcEwLFYdYAaFlvosYvCEJkTJpAWYo9UeUcu2nJ0tqPZFj52Qje8+aGBEUk6Cw0WSqTjBx+5ogUQ+w==}
+  /@nr1e/commons@0.0.3-alpha.24:
+    resolution: {integrity: sha512-+yuaUqK3O4VH1W+jqQnpLWPLvI3TlNh4FM6l9o3cYsmCOyDLcT/N4xW4BkJHi11y8UmF6Yaoelwxqmhnk0IJ5Q==}
     dependencies:
       tslib: 2.6.2
     dev: false
