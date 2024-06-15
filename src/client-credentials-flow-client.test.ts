@@ -1,3 +1,5 @@
+// eslint-disable-next-line n/no-unpublished-import
+import {expect, test} from 'vitest';
 import {ClientCredentialsFlowClient} from './client-credentials-flow-client.js';
 import {JwtVerifier} from './jwt-helper.js';
 import {sleep} from '@nr1e/commons/lang';
