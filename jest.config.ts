@@ -1,4 +1,4 @@
-// eslint-disable-next-line node/no-unpublished-import
+// eslint-disable-next-line n/no-unpublished-import
 import type {JestConfigWithTsJest} from 'ts-jest';
 
 const jestConfig: JestConfigWithTsJest = {

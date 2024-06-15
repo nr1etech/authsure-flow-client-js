@@ -427,11 +427,11 @@ export class JwtVerifier {
   constructor(jwks: string | Jwks) {
     if (typeof jwks === 'string') {
       if (jwks.startsWith('https://')) {
-        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         this.jwks = createRemoteJWKSet(new URL(jwks));
       } else {
         this.jwks = createRemoteJWKSet(
-          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          // eslint-disable-next-line n/no-unsupported-features/node-builtins
           new URL(`https://${jwks}/.well-known/openid-configuration/jwks`)
         );
       }

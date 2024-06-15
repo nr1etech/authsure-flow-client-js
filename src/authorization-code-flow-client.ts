@@ -168,7 +168,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
 
   // TODO Refactor to make shorter and more readable
   async exchange(
-    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    // eslint-disable-next-line n/no-unsupported-features/node-builtins
     queryString: URLSearchParams
   ): Promise<ExchangeAuthorizationCodeResult> {
     const error = queryString.get('error');
