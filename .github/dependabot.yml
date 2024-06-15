@@ -3,14 +3,8 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
   - package-ecosystem: npm
     directory: /
-    target-branch: develop
     schedule:
-      interval: daily
-    ignore:
-      # Can't upgrade until JEST fixes https://github.com/kulshekhar/ts-jest/issues/4198
-      # Also, when we upgrade @typescript-eslint/typescript-estree produces a warning
-      - dependency-name: "typescript"
-        versions: [">=5.2"]
+      interval: weekly
