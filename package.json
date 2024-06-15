@@ -1,7 +1,7 @@
 {
   "name": "@authsure/flow-client",
   "description": "Provides client authentication functions for use with the AuthSure Flow API",
-  "version": "0.0.2-alpha.7",
+  "version": "0.0.2-alpha.8",
   "type": "module",
   "author": "NR1E, Inc",
   "publishConfig": {
