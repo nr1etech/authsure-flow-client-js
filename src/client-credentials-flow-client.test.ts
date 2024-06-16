@@ -74,3 +74,24 @@ test(
   },
   {timeout: 60000}
 );
+
+test('Test With Promises', async () => {
+  const clientId = Promise.resolve('flow-client-js-test');
+  const clientSecret = Promise.resolve(
+    'paxxXuyWhiLh0taW4uWPtF_A94m9aPiAbvuLcyIy4SfUe5ecssG_pNNbPvPLTn9T'
+  );
+  const client = new ClientCredentialsFlowClient({
+    authSureDomain: 'test.authsure.io',
+    clientId,
+    clientSecret,
+    scope: ['fakeapi'],
+    callback,
+    expirationBufferSeconds: 0,
+    refreshBufferSeconds: 0,
+  });
+  const result1 = await client.getTokenSafe();
+  expect(result1).toBeDefined();
+  expect(result1.success).toBe(true);
+  expect(result1.error).toBeNull();
+  expect(result1.result).toBeDefined();
+});
