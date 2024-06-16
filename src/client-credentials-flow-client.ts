@@ -1,4 +1,4 @@
-import axios, {AxiosInstance} from 'axios';
+import {AxiosInstance} from 'axios';
 import {FlowClient} from './flow-client.js';
 import {
   exchangeClientCredentials,
@@ -7,6 +7,10 @@ import {
 import {decodeAccessToken, isExpired} from './jwt-helper.js';
 import {SafeResult} from './safe-result.js';
 import {AuthSureFlowClientError, isAuthSureFlowClientError} from './errors.js';
+
+export const DEFAULT_REFRESH_BUFFER_SECONDS = 60;
+export const DEFAULT_EXPIRATION_BUFFER_SECONDS = 45;
+export const DEFAULT_DISABLE_BACKGROUND_REFRESH = false;
 
 /**
  * Callback for token exchange.
@@ -30,11 +34,11 @@ export interface ClientCredentialsFlowClientConfig {
   /**
    * The client ID to use.
    */
-  readonly clientId: string;
+  readonly clientId: string | Promise<string>;
   /**
    * The client secret to use.
    */
-  readonly clientSecret: string;
+  readonly clientSecret: string | Promise<string>;
   /**
    * The number of seconds before the access token expires to refresh the access token. Default is 60 seconds.
    *
@@ -68,28 +72,33 @@ export interface ClientCredentialsFlowClientConfig {
  * Client for the Client Credentials flow.
  */
 export class ClientCredentialsFlowClient extends FlowClient {
-  protected clientSecret: string;
+  protected clientId: string | Promise<string>;
+  protected clientSecret: string | Promise<string>;
+  protected scope: string | string[];
   protected result?: ExchangeClientCredentialsResult;
   protected expiration?: number;
   protected refreshBufferSeconds: number;
   protected disableBackgroundRefresh: boolean;
   protected expirationBufferSeconds: number;
   protected intervalId?: NodeJS.Timeout;
-  protected client: AxiosInstance;
   protected callbacks: ExchangeTokenCallback[];
 
-  constructor(protected config: ClientCredentialsFlowClientConfig) {
+  constructor(config: ClientCredentialsFlowClientConfig) {
     super(config);
+    this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
-    this.refreshBufferSeconds = config.refreshBufferSeconds ?? 60;
-    this.expirationBufferSeconds = config.expirationBufferSeconds ?? 45;
-    this.disableBackgroundRefresh = config.disableBackgroundRefresh ?? false;
+    this.scope = config.scope;
+    this.refreshBufferSeconds =
+      config.refreshBufferSeconds ?? DEFAULT_REFRESH_BUFFER_SECONDS;
+    this.expirationBufferSeconds =
+      config.expirationBufferSeconds ?? DEFAULT_EXPIRATION_BUFFER_SECONDS;
+    this.disableBackgroundRefresh =
+      config.disableBackgroundRefresh ?? DEFAULT_DISABLE_BACKGROUND_REFRESH;
     this.callbacks = config.callback
       ? Array.isArray(config.callback)
         ? config.callback
         : [config.callback]
       : [];
-    this.client = config.client ?? axios.create();
   }
 
   /**
@@ -129,9 +138,13 @@ export class ClientCredentialsFlowClient extends FlowClient {
     const result = await exchangeClientCredentials({
       client: this.client,
       tokenEndpoint: this.tokenEndpoint,
-      clientId: this.config.clientId,
-      clientSecret: this.clientSecret,
-      scope: this.config.scope,
+      clientId:
+        typeof this.clientId === 'string' ? this.clientId : await this.clientId,
+      clientSecret:
+        typeof this.clientSecret === 'string'
+          ? this.clientSecret
+          : await this.clientSecret,
+      scope: this.scope,
     });
     const decoded = decodeAccessToken(result.accessToken);
     if (decoded === null) {
