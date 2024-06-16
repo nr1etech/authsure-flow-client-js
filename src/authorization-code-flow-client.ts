@@ -70,7 +70,7 @@ export interface BaseAuthorizationCodeFlowConfig {
   /**
    * The scopes to use.
    */
-  readonly scopes?: string[];
+  readonly scope?: string | string[];
   /**
    * The jwt verifier to use or the properties to create a new jwt verifier.
    */
@@ -121,7 +121,7 @@ export function isAuthorizationCodeFlowPkceConfig(
 export class AuthorizationCodeFlowClient extends FlowClient {
   protected state?: string;
   protected nonce?: string;
-  protected scopes?: string[];
+  protected scope?: string | string[];
   protected codeVerifier?: string;
   protected result?:
     | ExchangeAuthorizationCodeResult
@@ -137,7 +137,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
       | AuthorizationCodeFlowPkceConfig
   ) {
     super(config);
-    this.scopes = config.scopes;
+    this.scope = config.scope;
     this.jwtVerifier = config.jwtVerifier ?? new JwtVerifier(this.jwksUri);
   }
 
@@ -151,7 +151,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
       loginHint: this.config.loginHint,
       prompt: this.config.prompt,
       flow: this.config.flow,
-      scopes: this.config.scopes,
+      scope: this.config.scope,
     };
     let url: AuthorizationCodeFlowUrlPkce | AuthorizationCodeFlowUrl;
     if (isAuthorizationCodeFlowPkceConfig(this.config)) {
@@ -162,7 +162,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
     }
     this.state = url.state;
     this.nonce = url.nonce;
-    this.scopes = url.scopes;
+    this.scope = url.scopes;
     return url.url;
   }
 
@@ -198,7 +198,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
         clientId: config.clientId,
         codeVerifier: this.codeVerifier!,
         code,
-        scope: this.scopes!,
+        scope: this.scope!,
       });
     } else {
       const config = this.config as AuthorizationCodeFlowConfig;
@@ -208,7 +208,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
         clientId: config.clientId,
         clientSecret: config.clientSecret,
         code,
-        scope: this.scopes!,
+        scope: this.scope!,
       });
     }
     if (!result.idToken) {
@@ -231,7 +231,7 @@ export class AuthorizationCodeFlowClient extends FlowClient {
     if (!result.scopes) {
       throw new AuthSureFlowClientError('No scopes returned');
     }
-    for (const s of this.scopes!) {
+    for (const s of this.scope!) {
       if (!result.scopes.includes(s)) {
         throw new AuthSureFlowClientError(`Missing scope ${s} in response`);
       }

@@ -55,9 +55,9 @@ export interface ClientCredentialsFlowClientConfig {
    */
   readonly disableBackgroundRefresh?: boolean;
   /**
-   * The scopes to use.
+   * The scopes to use. This can either be a space delimited string or an array of strings.
    */
-  readonly scopes: string[];
+  readonly scope: string | string[];
   /**
    * Callback for the token exchange.
    */
@@ -131,7 +131,7 @@ export class ClientCredentialsFlowClient extends FlowClient {
       tokenEndpoint: this.tokenEndpoint,
       clientId: this.config.clientId,
       clientSecret: this.clientSecret,
-      scope: this.config.scopes,
+      scope: this.config.scope,
     });
     const decoded = decodeAccessToken(result.accessToken);
     if (decoded === null) {

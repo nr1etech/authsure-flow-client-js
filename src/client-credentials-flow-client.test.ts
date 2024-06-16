@@ -26,7 +26,7 @@ test(
       authSureDomain: 'test.authsure.io',
       clientId,
       clientSecret,
-      scopes: ['fakeapi'],
+      scope: ['fakeapi'],
       callback,
       expirationBufferSeconds: 0,
       refreshBufferSeconds: 0,
