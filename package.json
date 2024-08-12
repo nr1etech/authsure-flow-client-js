@@ -27,7 +27,7 @@
     "site": "typedoc --out site \"src/**/*.ts\" --exclude \"src/**/*.test.ts\""
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
+    "@types/node": "^22.2.0",
     "@vitest/coverage-v8": "^1.6.0",
     "gts": "^5.3.1",
     "ts-node": "^10.9.2",
